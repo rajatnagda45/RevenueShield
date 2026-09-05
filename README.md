@@ -4,7 +4,6 @@
 
 ### AI Revenue Recovery that *proves* what it recovered
 
-**Razorpay AI Buildathon — Track 3 (AI Revenue Recovery)**
 *"Find revenue that's slipping away and win it back."*
 
 [![Tests](https://img.shields.io/badge/tests-406%20passing-brightgreen)]()
@@ -304,9 +303,3 @@ HMAC-SHA256 verification on every webhook · PII masked in logs · secrets only 
 internal endpoints behind `X-Internal-Secret` in production · explicit CORS allow-list · hash-chained audit log.
 
 ---
-
-<div align="center">
-
-**MIT License** · Built for the Razorpay AI Buildathon
-
-</div>
