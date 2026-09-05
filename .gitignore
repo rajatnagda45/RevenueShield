@@ -68,3 +68,9 @@ scratch/
 # Replay reports (keep .md/.json, never the throwaway database)
 reports/*.db
 reports/*.db-journal
+
+# Internal planning docs (not published)
+newplan.md
+demo.md
+decision.md
+MEMO.md
