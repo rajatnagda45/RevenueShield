@@ -24,9 +24,6 @@ escalation, **stops the moment the money lands**, and reports the **incremental*
 come back — with a confidence interval, a p-value, a settlement reconciliation, and a tamper-evident audit trail.
 An LLM decides *what to say and when*; deterministic code decides *everything that must be correct*.
 
-<p align="center">
-  <img src="docs/assets/dashboard.jpg" alt="RevenueShield Command Center" width="100%" />
-</p>
 
 ---
 
