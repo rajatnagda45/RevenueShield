@@ -1,0 +1,51 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Lint (correctness rules)
+        run: ruff check app scripts
+      - name: Tests
+        run: pytest tests -q
+      - name: Import smoke (CLI import order)
+        run: python -c "import app.simulation.replay, app.detectors.receivables, app.api.surfaces; print('ok')"
+      - name: Replay (60 cases, offline)
+        env:
+          DATABASE_URL: sqlite:///./ci_replay.db
+          EXPERIMENTS_ENABLED: "true"
+          LLM_PROVIDER: "null"
+        run: python scripts/replay_batch.py --n 60 --days 5 --seed 3 --agent --provider null --init-db --out ../reports/ci
+      - uses: actions/upload-artifact@v4
+        with:
+          name: replay-report
+          path: reports/ci
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend-next
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend-next/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build

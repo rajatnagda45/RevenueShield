@@ -1,0 +1,120 @@
+version: "3.8"
+
+# One command brings up the whole system:  docker compose up --build
+#   postgres  - state
+#   backend   - FastAPI API + webhook receiver + dashboards (http://localhost:8000)
+#   worker    - background worker: plan ticks, sweeps, degradation monitor, approvals expiry, settlements
+# Optional: set ANTHROPIC_API_KEY (Claude) or OPENAI_API_KEY (GPT-4o) to let the Recovery Agent plan with an LLM; without either the deterministic
+# planner is used and every feature still works.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: revenueshield_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgrespassword}
+      POSTGRES_DB: ${POSTGRES_DB:-revenue_recovery}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-revenue_recovery}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: revenueshield_backend
+    restart: unless-stopped
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2"
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - DEBUG=${DEBUG:-false}
+      - LOG_JSON=${LOG_JSON:-true}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:8000,http://127.0.0.1:8000}
+      - DATABASE_URL=postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgrespassword}@postgres:5432/${POSTGRES_DB:-revenue_recovery}
+      - EXECUTION_MODE=${EXECUTION_MODE:-dry_run}
+      - COMMUNICATION_MODE=${COMMUNICATION_MODE:-dry_run}
+      - WHATSAPP_MODE=${WHATSAPP_MODE:-DRY_RUN}
+      - EXPERIMENTS_ENABLED=${EXPERIMENTS_ENABLED:-true}
+      - HOLDOUT_PERCENT=${HOLDOUT_PERCENT:-10}
+      - AGENT_DRIVES_PLANS=${AGENT_DRIVES_PLANS:-true}
+      - LLM_PROVIDER=${LLM_PROVIDER:-auto}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - LLM_MODEL_PLANNER_OPENAI=${LLM_MODEL_PLANNER_OPENAI:-gpt-4o}
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID:-}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET:-}
+      - RAZORPAY_WEBHOOK_SECRET=${RAZORPAY_WEBHOOK_SECRET:-}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER:-}
+      - TWILIO_WEBHOOK_BASE_URL=${TWILIO_WEBHOOK_BASE_URL:-}
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL:-}
+      - INTERNAL_API_SECRET=${INTERNAL_API_SECRET:-}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: revenueshield_worker
+    restart: unless-stopped
+    command: python scripts/run_worker.py
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - LOG_JSON=${LOG_JSON:-true}
+      - DATABASE_URL=postgresql+psycopg2://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgrespassword}@postgres:5432/${POSTGRES_DB:-revenue_recovery}
+      - EXECUTION_MODE=${EXECUTION_MODE:-dry_run}
+      - COMMUNICATION_MODE=${COMMUNICATION_MODE:-dry_run}
+      - WHATSAPP_MODE=${WHATSAPP_MODE:-DRY_RUN}
+      - EXPERIMENTS_ENABLED=${EXPERIMENTS_ENABLED:-true}
+      - HOLDOUT_PERCENT=${HOLDOUT_PERCENT:-10}
+      - AGENT_DRIVES_PLANS=${AGENT_DRIVES_PLANS:-true}
+      - LLM_PROVIDER=${LLM_PROVIDER:-auto}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - LLM_MODEL_PLANNER_OPENAI=${LLM_MODEL_PLANNER_OPENAI:-gpt-4o}
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID:-}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET:-}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER:-}
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL:-}
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    driver: local
