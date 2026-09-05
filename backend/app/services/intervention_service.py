@@ -131,6 +131,7 @@ class InterventionService:
         dry_run: Optional[bool] = None,
         accept_partial: bool = False,
         first_min_partial_amount: Optional[Decimal] = None,
+        reference_time: Optional[datetime] = None,
     ) -> InterventionResult:
         """Execute recovery intervention with idempotency and policy guards.
 
@@ -146,6 +147,10 @@ class InterventionService:
         case = db.scalar(select(RecoveryCase).where(RecoveryCase.id == recovery_case_id))
         if not case:
             raise ValueError(f"RecoveryCase '{recovery_case_id}' not found.")
+
+        # Every time-based rule (contact window, frequency caps) evaluates against the
+        # caller's clock so replay/virtual-time and tests are deterministic; falls back to now.
+        now = reference_time or datetime.now(timezone.utc)
 
         # 1. State Check: Block if case is already recovered or closed
         if case.status in ("RECOVERED", "CLOSED"):
@@ -218,7 +223,7 @@ class InterventionService:
         # 2b. Cross-channel compliance for the notification that carries the payment link
         from app.compliance.contact_policy import ContactPolicy
         notify_channel = "WHATSAPP" if (case.customer and case.customer.phone) else "EMAIL"
-        compliance = ContactPolicy.evaluate(db, case=case, customer=case.customer, channel=notify_channel)
+        compliance = ContactPolicy.evaluate(db, case=case, customer=case.customer, channel=notify_channel, now=now)
         if not compliance.allowed:
             cls._audit(
                 db=db,
@@ -465,7 +470,7 @@ class InterventionService:
             LedgerService.post_cost(db, case, channel="PAYMENT_LINK", provider_reference=str(payment_link_id))
             LedgerService.post_cost(db, case, channel=str(notif_result.channel or "WHATSAPP"), provider_reference=f"notif_{intervention.id}")
             from app.compliance.contact_policy import ContactPolicy
-            ContactPolicy.record_sent(db, case=case, channel=str(notif_result.channel or "WHATSAPP"), reference=f"notif_{intervention.id}")
+            ContactPolicy.record_sent(db, case=case, channel=str(notif_result.channel or "WHATSAPP"), reference=f"notif_{intervention.id}", now=now)
             db.commit()
 
             return InterventionResult(

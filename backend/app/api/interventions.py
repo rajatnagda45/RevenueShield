@@ -1,4 +1,5 @@
 """Recovery Intervention API Endpoints."""
+from datetime import datetime
 from decimal import Decimal
 import logging
 from typing import Any, Dict, List, Optional
@@ -33,6 +34,11 @@ class CreateInterventionRequest(BaseModel):
     dry_run: Optional[bool] = Field(
         default=None,
         description="Override dry_run flag. If omitted, server environment setting is used.",
+    )
+    reference_time: Optional[datetime] = Field(
+        default=None,
+        description="Evaluate time-based policy (contact window, frequency caps) at this instant. "
+        "Omit in production to use the current time; used by replay and deterministic tests.",
     )
 
 
@@ -108,6 +114,7 @@ def execute_case_intervention(
     """Trigger prediction, policy check, payment link creation, and customer notification."""
     action_override = payload.action if payload else None
     dry_run_override = payload.dry_run if payload else None
+    reference_time = payload.reference_time if payload else None
 
     try:
         res: InterventionResult = InterventionService.execute_intervention(
@@ -115,6 +122,7 @@ def execute_case_intervention(
             recovery_case_id=case_id,
             action_override=action_override,
             dry_run=dry_run_override,
+            reference_time=reference_time,
         )
 
         plink_dto = None

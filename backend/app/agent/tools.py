@@ -196,7 +196,7 @@ class AgentToolbox:
         if gate:
             return gate
         from app.services.intervention_service import InterventionService
-        res = InterventionService.execute_intervention(self.db, self.case.id, action_override="SEND_PAYMENT_LINK", dry_run=self.dry_run)
+        res = InterventionService.execute_intervention(self.db, self.case.id, action_override="SEND_PAYMENT_LINK", dry_run=self.dry_run, reference_time=self.now)
         return {"ok": res.status == "SENT", "status": res.status, "reason": res.reason, "blocking_rule": None if res.status == "SENT" else (res.reason or "BLOCKED").split(":")[0][:60], "payment_link": res.payment_link.__dict__ if res.payment_link else None}
 
     def offer_payment_plan(self, installments: int, first_payment_pct: float, due_days: int = 7, waiver_pct: float = 0.0) -> Dict[str, Any]:
@@ -213,7 +213,7 @@ class AgentToolbox:
         from app.services.intervention_service import InterventionService
         res = InterventionService.execute_intervention(
             self.db, self.case.id, action_override="SEND_PAYMENT_LINK", dry_run=self.dry_run,
-            accept_partial=True, first_min_partial_amount=first_amount,
+            accept_partial=True, first_min_partial_amount=first_amount, reference_time=self.now,
         )
         if res.status == "SENT":
             meta = dict(self.case.case_metadata or {})

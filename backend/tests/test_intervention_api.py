@@ -77,7 +77,8 @@ def test_execute_intervention_endpoint(client: TestClient, db_session: Session):
 
     res = client.post(
         f"/recovery-cases/{case.id}/interventions",
-        json={"action": "SEND_PAYMENT_LINK", "dry_run": True},
+        # Pin the clock inside the contact window so the test is deterministic regardless of when CI runs.
+        json={"action": "SEND_PAYMENT_LINK", "dry_run": True, "reference_time": "2026-09-07T11:00:00+05:30"},
     )
     assert res.status_code == 200
     data = res.json()
