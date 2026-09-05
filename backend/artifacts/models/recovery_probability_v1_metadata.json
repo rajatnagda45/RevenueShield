@@ -1,0 +1,190 @@
+{
+  "model_name": "RecoveryProbabilityLogisticRegression",
+  "model_version": "recovery_probability_v1",
+  "training_timestamp": "2026-08-26T16:28:17.036281+00:00",
+  "dataset_hash": "8fbcb347605ccc92",
+  "total_samples": 120,
+  "train_samples": 90,
+  "test_samples": 30,
+  "train_date_range": {
+    "min": null,
+    "max": null
+  },
+  "test_date_range": {
+    "min": null,
+    "max": null
+  },
+  "train_recovery_rate": 0.5444444444444444,
+  "test_recovery_rate": 0.7,
+  "attribution_window_hours": 24,
+  "target_definition": "recovered within 72 hours (1 or 0)",
+  "intervention_types": [],
+  "metrics": {
+    "roc_auc": 0.4444444444444445,
+    "pr_auc": 0.6580271403713321,
+    "accuracy": 0.3333333333333333,
+    "precision": 0.5384615384615384,
+    "recall": 0.3333333333333333,
+    "f1": 0.4117647058823529,
+    "log_loss": 0.7078190031228887,
+    "brier_score": 0.257327776361569,
+    "baseline_brier_score": 0.2341975308641976,
+    "baseline_log_loss": 0.661463841641534,
+    "baseline_recovery_rate": 0.5444444444444444,
+    "brier_skill_score": -0.09876383159130642,
+    "calibration_error": 0.20993301610536347,
+    "intervention_breakdown": {
+      "UNKNOWN": {
+        "samples": 30,
+        "recovery_rate": 0.7,
+        "mean_predicted_prob": 0.4900669838946365,
+        "brier_score": 0.257327776361569
+      }
+    }
+  },
+  "feature_schema_version": "v2_nba",
+  "feature_coefficients": [
+    {
+      "feature": "amount_at_risk",
+      "coefficient": 0.1608,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.1745
+    },
+    {
+      "feature": "currency_UNKNOWN",
+      "coefficient": 0.0002,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0002
+    },
+    {
+      "feature": "failure_code_UNKNOWN",
+      "coefficient": 0.0002,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0002
+    },
+    {
+      "feature": "failure_category_UNKNOWN",
+      "coefficient": 0.0002,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0002
+    },
+    {
+      "feature": "payment_type_UNKNOWN",
+      "coefficient": 0.0002,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0002
+    },
+    {
+      "feature": "previous_intervention_outcome_UNKNOWN",
+      "coefficient": 0.0002,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0002
+    },
+    {
+      "feature": "intervention_type_UNKNOWN",
+      "coefficient": 0.0002,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0002
+    },
+    {
+      "feature": "days_overdue",
+      "coefficient": 0.0,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0
+    },
+    {
+      "feature": "is_subscription_or_invoice",
+      "coefficient": 0.0,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0
+    },
+    {
+      "feature": "customer_age_days",
+      "coefficient": 0.0,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0
+    },
+    {
+      "feature": "previous_successful_payments",
+      "coefficient": 0.0,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0
+    },
+    {
+      "feature": "previous_failed_payments",
+      "coefficient": 0.0,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0
+    },
+    {
+      "feature": "previous_recoveries",
+      "coefficient": 0.0,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0
+    },
+    {
+      "feature": "previous_promises_to_pay",
+      "coefficient": 0.0,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0
+    },
+    {
+      "feature": "previous_ptp_fulfillment_rate",
+      "coefficient": 0.0,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0
+    },
+    {
+      "feature": "previous_voice_attempts",
+      "coefficient": 0.0,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0
+    },
+    {
+      "feature": "previous_email_attempts",
+      "coefficient": 0.0,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0
+    },
+    {
+      "feature": "previous_whatsapp_attempts",
+      "coefficient": 0.0,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0
+    },
+    {
+      "feature": "hour_of_day",
+      "coefficient": 0.0,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0
+    },
+    {
+      "feature": "day_of_week",
+      "coefficient": 0.0,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0
+    },
+    {
+      "feature": "days_since_failure",
+      "coefficient": 0.0,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0
+    },
+    {
+      "feature": "number_of_previous_recovery_attempts",
+      "coefficient": 0.0,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0
+    },
+    {
+      "feature": "previous_recovery_time_seconds",
+      "coefficient": 0.0,
+      "direction": "POSITIVE_RECOVERY",
+      "odds_ratio": 1.0
+    }
+  ],
+  "model_artifact_path": "artifacts\\models\\recovery_probability_v1.joblib",
+  "metadata_artifact_path": "artifacts\\models\\recovery_probability_v1_metadata.json",
+  "is_sufficient_data": true,
+  "insufficient_reason": null
+}

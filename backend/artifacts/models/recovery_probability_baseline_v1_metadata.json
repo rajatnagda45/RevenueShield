@@ -1,0 +1,47 @@
+{
+  "model_name": "RecoveryProbabilityLogisticRegression",
+  "model_version": "recovery_probability_baseline_v1",
+  "training_timestamp": "2026-08-26T16:24:15.821904+00:00",
+  "dataset_hash": "8da77dd7f6c733b1",
+  "total_samples": 120,
+  "train_samples": 90,
+  "test_samples": 30,
+  "train_date_range": {
+    "min": null,
+    "max": null
+  },
+  "test_date_range": {
+    "min": null,
+    "max": null
+  },
+  "train_recovery_rate": 0.5444444444444444,
+  "test_recovery_rate": 0.7,
+  "metrics": {
+    "roc_auc": 0.4444444444444445,
+    "pr_auc": 0.6580271403713321,
+    "accuracy": 0.3333333333333333,
+    "precision": 0.5384615384615384,
+    "recall": 0.3333333333333333,
+    "f1": 0.4117647058823529,
+    "log_loss": 0.7078190031228887,
+    "brier_score": 0.257327776361569,
+    "baseline_brier_score": 0.2341975308641976,
+    "baseline_log_loss": 0.661463841641534,
+    "baseline_recovery_rate": 0.5444444444444444,
+    "brier_skill_score": -0.09876383159130642,
+    "calibration_error": 0.20993301610536347,
+    "intervention_breakdown": {
+      "UNKNOWN": {
+        "samples": 30,
+        "recovery_rate": 0.7,
+        "mean_predicted_prob": 0.4900669838946365,
+        "brier_score": 0.257327776361569
+      }
+    }
+  },
+  "feature_schema_version": "v2_nba",
+  "model_artifact_path": "artifacts\\models\\recovery_probability_baseline_v1.joblib",
+  "metadata_artifact_path": "artifacts\\models\\recovery_probability_baseline_v1_metadata.json",
+  "is_sufficient_data": true,
+  "insufficient_reason": null
+}
