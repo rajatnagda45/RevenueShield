@@ -1,0 +1,20 @@
+[tool.ruff]
+line-length = 160
+target-version = "py310"
+extend-exclude = ["venv", ".venv", "alembic/versions", "app/ml/artifacts"]
+
+[tool.ruff.lint]
+# Correctness first: undefined names, syntax, redefinitions. Style rules are opt-in later.
+select = ["F821", "F822", "F823", "F811", "E9", "F401"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"app/models/__init__.py" = ["F401"]
+"app/api/__init__.py" = ["F401"]
+"app/**/__init__.py" = ["F401"]
+"tests/*" = ["F401", "F811"]
+"scripts/*" = ["F401"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
