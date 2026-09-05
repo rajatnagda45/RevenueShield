@@ -53,4 +53,4 @@ def test_readiness_reports_jobs_chain_and_llm(client: TestClient):
     res = client.get("/health/ready")
     assert res.status_code == 200
     body = res.json()
-    assert body["status"] == "ready" and "jobs" in body and body["audit_chain"]["ok"] is True and body["llm"]["provider"] in ("null", "anthropic")
+    assert body["status"] == "ready" and "jobs" in body and body["audit_chain"]["ok"] is True and body["llm"]["provider"] in ("null", "anthropic", "openai")

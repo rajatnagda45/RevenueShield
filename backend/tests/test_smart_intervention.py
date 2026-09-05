@@ -20,6 +20,11 @@ from app.services.intervention_service import InterventionService, InterventionR
 from app.services.event_processor import EventProcessor, WebhookProcessingResult
 from app.integrations.razorpay.payment_link_client import RazorpayPaymentLinkClient, PaymentLinkResponse
 
+# 11:00 IST — squarely inside the 08:00-21:00 contact window, so these tests are
+# deterministic regardless of when CI runs (an IST-evening run would otherwise hit
+# the window block and fail).
+DAYTIME = datetime(2026, 9, 7, 5, 30, tzinfo=timezone.utc)
+
 
 def _setup_failed_case(db_session: Session, amount: Decimal = Decimal("5000.00"), retry_count: int = 0) -> RecoveryCase:
     """Helper to set up customer, payment, event, and open recovery case."""
@@ -100,6 +105,7 @@ def test_dry_run_intervention_lifecycle(db_session: Session):
         recovery_case_id=case.id,
         action_override="SEND_PAYMENT_LINK",
         dry_run=True,
+        reference_time=DAYTIME,
     )
 
     assert result.status == "SENT"
@@ -140,13 +146,13 @@ def test_intervention_idempotency_duplicate_prevention(db_session: Session):
 
     # First execution
     res1 = InterventionService.execute_intervention(
-        db=db_session, recovery_case_id=case.id, dry_run=True
+        db=db_session, recovery_case_id=case.id, dry_run=True, reference_time=DAYTIME
     )
     assert res1.status == "SENT"
 
     # Second execution
     res2 = InterventionService.execute_intervention(
-        db=db_session, recovery_case_id=case.id, dry_run=True
+        db=db_session, recovery_case_id=case.id, dry_run=True, reference_time=DAYTIME
     )
     assert res2.status == "SENT"
     assert res2.intervention_id == res1.intervention_id
@@ -170,7 +176,7 @@ def test_policy_rejection_blocks_intervention_and_records_blocked_state(db_sessi
     case = _setup_failed_case(db_session, amount=Decimal("2000.00"), retry_count=3)
 
     result = InterventionService.execute_intervention(
-        db=db_session, recovery_case_id=case.id, dry_run=True
+        db=db_session, recovery_case_id=case.id, dry_run=True, reference_time=DAYTIME
     )
 
     assert result.status == "BLOCKED"
@@ -196,7 +202,7 @@ def test_webhook_payment_captured_stopping_rule_and_reconciliation(db_session: S
 
     # 1. Execute Intervention
     exec_res = InterventionService.execute_intervention(
-        db=db_session, recovery_case_id=case.id, dry_run=True
+        db=db_session, recovery_case_id=case.id, dry_run=True, reference_time=DAYTIME
     )
     assert exec_res.status == "SENT"
 
@@ -266,7 +272,7 @@ def test_cannot_intervene_on_already_recovered_case(db_session: Session):
     db_session.commit()
 
     res = InterventionService.execute_intervention(
-        db=db_session, recovery_case_id=case.id, dry_run=True
+        db=db_session, recovery_case_id=case.id, dry_run=True, reference_time=DAYTIME
     )
     assert res.status == "ALREADY_RECOVERED"
     assert res.payment_link is None
