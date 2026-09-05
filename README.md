@@ -3,7 +3,11 @@
 # 🛡️ RevenueShield
 
 ### AI Revenue Recovery that *proves* what it recovered
+<div align="center">
 
+**MIT License** · Built for the Razorpay AI Buildathon
+
+</div>
 *"Find revenue that's slipping away and win it back."*
 
 [![Tests](https://img.shields.io/badge/tests-406%20passing-brightgreen)]()
